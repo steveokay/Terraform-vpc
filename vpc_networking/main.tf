@@ -72,3 +72,11 @@ resource "aws_subnet" "module_private_subnet_3" {
   }
 }
 
+# create route table for public subnets/routes
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.module_vpc.id
+
+  tags{
+    Name = "Public-Route-Table"
+  }
+}
