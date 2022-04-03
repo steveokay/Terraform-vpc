@@ -89,3 +89,35 @@ resource "aws_route_table" "private_route_table" {
     Name = "Private-Route-Table"
   }
 }
+
+# Associate Route Table with public subnets
+resource "aws_route_table_association" "public_subnet_1_association" {
+  subnet_id = aws_subnet.module_public_subnet_1.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+resource "aws_route_table_association" "public_subnet_2_association" {
+  subnet_id = aws_subnet.module_public_subnet_2.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+resource "aws_route_table_association" "public_subnet_3_association" {
+  subnet_id = aws_subnet.module_public_subnet_3.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# Associate Route Table with private subnets
+resource "aws_route_table_association" "private_subnet_1_association" {
+  subnet_id = aws_subnet.module_private_subnet_1.id
+  route_table_id = aws_route_table.private_route_table.id
+}
+
+resource "aws_route_table_association" "private_subnet_2_association" {
+  subnet_id = aws_subnet.module_private_subnet_2.id
+  route_table_id = aws_route_table.private_route_table.id
+}
+
+resource "aws_route_table_association" "private_subnet_3_association" {
+  subnet_id = aws_subnet.module_private_subnet_3.id
+  route_table_id = aws_route_table.private_route_table.id
+}
