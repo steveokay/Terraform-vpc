@@ -121,3 +121,93 @@ resource "aws_route_table_association" "private_subnet_3_association" {
   subnet_id = aws_subnet.module_private_subnet_3.id
   route_table_id = aws_route_table.private_route_table.id
 }
+
+# create elastic ip for our nat gateway
+# elastic ip gives flexibility for nat gateway to scale properly
+resource "aws_eip" "elastic_ip_for_nat_gateway" {
+
+  vpc = true # To use it for our vpc networking set vpc true
+  associate_with_private_ip = var.eip_association_address
+
+  tags{
+    Name = "Production-EIP"
+  }
+}
+
+# create NAT Gateway and add to our routing table
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.elastic_ip_for_nat_gateway.id
+  subnet_id = aws_subnet.module_public_subnet_1.id
+
+  tags = {
+    Name = "Production-NAT-Gateway"
+  }
+}
+
+# nat gw route
+resource "aws_route" "nat_gateway_route" {
+  route_table_id = aws_route_table.public_route_table.id
+  nat_gateway_id = aws_nat_gateway.nat_gateway.id
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+# create internet gateway and add to routing table
+resource "aws_internet_gateway" "internet_gateway" {
+  vpc_id = aws_vpc.module_vpc.id
+
+  tags{
+    Name = "Production-Internet-Gateway"
+  }
+}
+
+resource "aws_route" "internet_gateway_route" {
+  route_table_id = aws_route_table.public_route_table.id
+  gateway_id = aws_internet_gateway.internet_gateway.id
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+#implementing EC2 instance
+#1.  ami
+data "aws_ami" "ubuntu_latest" {
+  owners = ["099720109477"]
+  most_recent = true # to get latest image
+
+  filter {
+    name = "virtualization-type"
+#    values = ["ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*"]
+    values = ["hvm"]
+  }
+}
+
+#2.generate keypair using aws cli
+# cmd :-> aws ec2 create-key-pair --key-name my-first-ec2-instance --region us-east-2 --query 'KeyMaterial' --output text > my-first-ec2-instance.pem
+
+#3.create security group
+resource "aws_security_group" "ec2-security-group" {
+  name = "EC2-Instance-Security-Group"
+  vpc_id = aws_vpc.module_vpc.id
+
+  ingress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    protocol  = "-1"
+    to_port   = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+}
+
+#4. define resource for our aws instance
+resource "aws_instance" "my-first-ec2-instance" {
+  ami = data.aws_ami.ubuntu_latest.id
+  instance_type = "t2.micro"
+  key_name = "my-first-ec2-instance"
+  security_groups = [aws_security_group.ec2-security-group.id]
+  subnet_id = aws_subnet.module_public_subnet_1.id
+}
