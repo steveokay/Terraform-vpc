@@ -6,7 +6,7 @@ resource "aws_vpc" "module_vpc" {
   cidr_block = var.vpc_cidr_block
   enable_dns_hostnames = true #aplies to publicly available ec2 instances
 
-  tags{
+  tags = {
     Name = "Production_VPC"
   }
 }
@@ -18,7 +18,7 @@ resource "aws_subnet" "module_public_subnet_1" {
   # we will extend our availability to 3 availability zones
   availability_zone = "${var.region}a"
 #  map_public_ip_on_launch = true
-  tags{
+  tags = {
     Name = "Public-Subnet-1"
   }
 }
@@ -27,7 +27,7 @@ resource "aws_subnet" "module_public_subnet_2" {
   vpc_id = aws_vpc.module_vpc.id
   cidr_block = var.public_subnet_2_cidr_block
   availability_zone = "${var.region}b"
-  tags{
+  tags = {
     Name = "Public-Subnet-2"
   }
 }
@@ -36,7 +36,7 @@ resource "aws_subnet" "module_public_subnet_3" {
   vpc_id = aws_vpc.module_vpc.id
   cidr_block = var.public_subnet_3_cidr_block
   availability_zone = "${var.region}c"
-  tags{
+  tags = {
     Name = "Public-Subnet-3"
   }
 }
@@ -76,7 +76,7 @@ resource "aws_subnet" "module_private_subnet_3" {
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.module_vpc.id
 
-  tags{
+  tags = {
     Name = "Public-Route-Table"
   }
 }
@@ -85,7 +85,7 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.module_vpc.id
 
-  tags{
+  tags = {
     Name = "Private-Route-Table"
   }
 }
@@ -129,7 +129,7 @@ resource "aws_eip" "elastic_ip_for_nat_gateway" {
   vpc = true # To use it for our vpc networking set vpc true
   associate_with_private_ip = var.eip_association_address
 
-  tags{
+  tags = {
     Name = "Production-EIP"
   }
 }
@@ -155,7 +155,7 @@ resource "aws_route" "nat_gateway_route" {
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.module_vpc.id
 
-  tags{
+  tags = {
     Name = "Production-Internet-Gateway"
   }
 }
