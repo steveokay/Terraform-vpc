@@ -1,3 +1,5 @@
 .terraform.lock.hcl
 .terraform/
 *.tfstate
+*.pem
+my-first-ec2-instance.pem
